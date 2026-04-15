@@ -1,5 +1,4 @@
 public class app {
-
     // Static method for Feet comparison
     public static boolean compareFeet(double value1, double value2) {
         Feet feet = new Feet(value1, value2);
@@ -10,10 +9,10 @@ public class app {
     public static boolean compareInches(double value1, double value2) {
         Inches inches = new Inches(value1, value2);
         return inches.areEqual();
+
     }
 
     public static void main(String[] args) {
-
         // Hard-coded values (as per UC2)
         double feetValue1 = 5.0;
         double feetValue2 = 5.0;
