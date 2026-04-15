@@ -9,66 +9,76 @@ public class app {
     public static boolean compareInches(double value1, double value2) {
         Inches inches = new Inches(value1, value2);
         return inches.areEqual();
-
-    }
-
     public static void main(String[] args) {
         // Hard-coded values (as per UC2)
         double feetValue1 = 5.0;
         double feetValue2 = 5.0;
+        // Sample inputs (can be changed)
+        QuantityLength q1 = new QuantityLength(1.0, Unit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, Unit.INCHES);
 
-        double inchValue1 = 12.0;
-        double inchValue2 = 10.0;
+        boolean result = q1.equals(q2);
 
-        // Feet comparison
-        boolean feetResult = compareFeet(feetValue1, feetValue2);
+        System.out.println("Comparing: ");
+        System.out.println("Value 1: " + q1.value + " " + q1.unit);
+        System.out.println("Value 2: " + q2.value + " " + q2.unit);
 
-        // Inches comparison
-        boolean inchResult = compareInches(inchValue1, inchValue2);
-
-        // Output
-        System.out.println("Feet तुलना:");
-        if (feetResult) {
-            System.out.println("Feet values are equal.");
+        if (result) {
+            System.out.println("Result: Both quantities are equal.");
         } else {
-            System.out.println("Feet values are NOT equal.");
-        }
-
-        System.out.println("\nInches तुलना:");
-        if (inchResult) {
-            System.out.println("Inch values are equal.");
-        } else {
-            System.out.println("Inch values are NOT equal.");
+            System.out.println("Result: Quantities are NOT equal.");
         }
     }
 }
 
-// Feet class
-class Feet {
-    private double value1;
-    private double value2;
-
-    public Feet(double value1, double value2) {
-        this.value1 = value1;
-        this.value2 = value2;
-    }
-
-    public boolean areEqual() {
-        return value1 == value2;
-    }
+// Enum for unit types
+enum Unit {
+    FEET,
+    INCHES
 }
 
-// Inches class
-class Inches {
-    private double value1;
-    private double value2;
+// Generic Quantity Length class (DRY applied)
+class QuantityLength {
 
-    public Inches(double value1, double value2) {
-        this.value1 = value1;
-        this.value2 = value2;
+    double value;
+    Unit unit;
+
+    // Conversion constants
+    private static final double INCH_TO_FEET = 1.0 / 12.0;
+
+    public QuantityLength(double value, Unit unit) {
+
+        // Validate numeric
+        if (Double.isNaN(value)) {
+            throw new IllegalArgumentException("Value must be numeric");
+        }
+
+        // Validate unit
+        if (unit == null) {
+            throw new IllegalArgumentException("Unit cannot be null");
+        }
+
+        this.value = value;
+        this.unit = unit;
     }
 
-    public boolean areEqual() {
-        return value1 == value2;
+    // Convert everything to base unit (FEET)
+    private double toFeet() {
+        switch (unit) {
+            case FEET:
+                return value;
+            case INCHES:
+                return value * INCH_TO_FEET;
+            default:
+                throw new IllegalArgumentException("Unsupported unit");
+        }
+    }
+
+    // Equality check after conversion
+    public boolean equals(QuantityLength other) {
+        double base1 = this.toFeet();
+        double base2 = other.toFeet();
+
+        return Math.abs(base1 - base2) < 0.0001;
     }
 }
