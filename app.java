@@ -1,5 +1,4 @@
 public class app {
-
     public static void main(String[] args) {
 
         // Example comparisons
@@ -42,7 +41,6 @@ class QuantityLength {
 
     double value;
     Unit unit;
-
     public QuantityLength(double value, Unit unit) {
 
         // Validate numeric
@@ -70,5 +68,13 @@ class QuantityLength {
         double v2 = other.toBase();
 
         return Math.abs(v1 - v2) < 0.0001;
+    }
+
+    // Equality check after conversion
+    public boolean equals(QuantityLength other) {
+        double base1 = this.toFeet();
+        double base2 = other.toFeet();
+
+        return Math.abs(base1 - base2) < 0.0001;
     }
 }
