@@ -1,29 +1,73 @@
 public class app {
 
-    // Method to check equality of two feet measurements
-    public boolean areEqual(double value1, double value2) {
-        return value1 == value2;
-    }
-
     public static void main(String[] args) {
 
-        app quantityMeasurementApp = new app();
+        // Sample inputs (can be changed)
+        QuantityLength q1 = new QuantityLength(1.0, Unit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, Unit.INCHES);
 
-        // Sample inputs (you can change these)
-        double feetValue1 = 10.0;
-        double feetValue2 = 10.0;
+        boolean result = q1.equals(q2);
 
-        // Validate inputs (basic numeric check is inherent since we use double)
-        boolean result = quantityMeasurementApp.areEqual(feetValue1, feetValue2);
-
-        // Output result
-        System.out.println("Value 1 (feet): " + feetValue1);
-        System.out.println("Value 2 (feet): " + feetValue2);
+        System.out.println("Comparing: ");
+        System.out.println("Value 1: " + q1.value + " " + q1.unit);
+        System.out.println("Value 2: " + q2.value + " " + q2.unit);
 
         if (result) {
-            System.out.println("Result: Both values are equal.");
+            System.out.println("Result: Both quantities are equal.");
         } else {
-            System.out.println("Result: Values are NOT equal.");
+            System.out.println("Result: Quantities are NOT equal.");
         }
+    }
+}
+
+// Enum for unit types
+enum Unit {
+    FEET,
+    INCHES
+}
+
+// Generic Quantity Length class (DRY applied)
+class QuantityLength {
+
+    double value;
+    Unit unit;
+
+    // Conversion constants
+    private static final double INCH_TO_FEET = 1.0 / 12.0;
+
+    public QuantityLength(double value, Unit unit) {
+
+        // Validate numeric
+        if (Double.isNaN(value)) {
+            throw new IllegalArgumentException("Value must be numeric");
+        }
+
+        // Validate unit
+        if (unit == null) {
+            throw new IllegalArgumentException("Unit cannot be null");
+        }
+
+        this.value = value;
+        this.unit = unit;
+    }
+
+    // Convert everything to base unit (FEET)
+    private double toFeet() {
+        switch (unit) {
+            case FEET:
+                return value;
+            case INCHES:
+                return value * INCH_TO_FEET;
+            default:
+                throw new IllegalArgumentException("Unsupported unit");
+        }
+    }
+
+    // Equality check after conversion
+    public boolean equals(QuantityLength other) {
+        double base1 = this.toFeet();
+        double base2 = other.toFeet();
+
+        return Math.abs(base1 - base2) < 0.0001;
     }
 }
