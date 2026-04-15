@@ -1,51 +1,46 @@
 public class app {
-    // Static method for Feet comparison
-    public static boolean compareFeet(double value1, double value2) {
-        Feet feet = new Feet(value1, value2);
-        return feet.areEqual();
-    }
-
-    // Static method for Inches comparison
-    public static boolean compareInches(double value1, double value2) {
-        Inches inches = new Inches(value1, value2);
-        return inches.areEqual();
     public static void main(String[] args) {
-        // Hard-coded values (as per UC2)
-        double feetValue1 = 5.0;
-        double feetValue2 = 5.0;
-        // Sample inputs (can be changed)
+
+        // Example comparisons
         QuantityLength q1 = new QuantityLength(1.0, Unit.FEET);
         QuantityLength q2 = new QuantityLength(12.0, Unit.INCHES);
 
-        boolean result = q1.equals(q2);
+        QuantityLength q3 = new QuantityLength(1.0, Unit.YARDS);
+        QuantityLength q4 = new QuantityLength(3.0, Unit.FEET);
 
-        System.out.println("Comparing: ");
-        System.out.println("Value 1: " + q1.value + " " + q1.unit);
-        System.out.println("Value 2: " + q2.value + " " + q2.unit);
+        QuantityLength q5 = new QuantityLength(2.54, Unit.CM);
+        QuantityLength q6 = new QuantityLength(1.0, Unit.INCHES);
 
-        if (result) {
-            System.out.println("Result: Both quantities are equal.");
-        } else {
-            System.out.println("Result: Quantities are NOT equal.");
-        }
+        System.out.println("1 ft == 12 in : " + q1.equals(q2));
+        System.out.println("1 yard == 3 ft : " + q3.equals(q4));
+        System.out.println("2.54 cm == 1 in : " + q5.equals(q6));
     }
 }
 
-// Enum for unit types
+// Enum with conversion to base unit (INCHES)
 enum Unit {
-    FEET,
-    INCHES
+
+    FEET(12.0),          // 1 ft = 12 inches
+    INCHES(1.0),         // base unit
+    YARDS(36.0),         // 1 yard = 36 inches
+    CM(0.393701);        // 1 cm = 0.393701 inches
+
+    private final double toInchesFactor;
+
+    Unit(double toInchesFactor) {
+        this.toInchesFactor = toInchesFactor;
+    }
+
+    public double toInches(double value) {
+        return value * toInchesFactor;
+    }
 }
 
-// Generic Quantity Length class (DRY applied)
+// Generic Quantity class (DRY maintained)
 class QuantityLength {
 
     double value;
     Unit unit;
-
-    // Conversion constants
-    private static final double INCH_TO_FEET = 1.0 / 12.0;
-
     public QuantityLength(double value, Unit unit) {
 
         // Validate numeric
@@ -62,16 +57,17 @@ class QuantityLength {
         this.unit = unit;
     }
 
-    // Convert everything to base unit (FEET)
-    private double toFeet() {
-        switch (unit) {
-            case FEET:
-                return value;
-            case INCHES:
-                return value * INCH_TO_FEET;
-            default:
-                throw new IllegalArgumentException("Unsupported unit");
-        }
+    // Convert to base unit (INCHES)
+    private double toBase() {
+        return unit.toInches(value);
+    }
+
+    // Equality check
+    public boolean equals(QuantityLength other) {
+        double v1 = this.toBase();
+        double v2 = other.toBase();
+
+        return Math.abs(v1 - v2) < 0.0001;
     }
 
     // Equality check after conversion
