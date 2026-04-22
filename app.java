@@ -1,4 +1,3 @@
-
 enum LengthUnit {
     FEET(1.0),                  // base unit
     INCHES(1.0 / 12.0),         // 1 inch = 1/12 feet
@@ -19,7 +18,6 @@ enum LengthUnit {
 class QuantityLength {
     private final double value;
     private final LengthUnit unit;
-
     public QuantityLength(double value, LengthUnit unit) {
         validateValue(value);
         validateUnit(unit, "unit");
@@ -35,12 +33,10 @@ class QuantityLength {
         return unit;
     }
 
-    // Convert current object to feet
     private double toFeet() {
         return this.value * this.unit.getConversionFactor();
     }
 
-    // Generic convert method from UC5
     public static double convert(double value, LengthUnit sourceUnit, LengthUnit targetUnit) {
         validateValue(value);
         validateUnit(sourceUnit, "sourceUnit");
@@ -50,7 +46,7 @@ class QuantityLength {
         return valueInFeet / targetUnit.getConversionFactor();
     }
 
-    // Instance method: add another length, result in unit of first operand
+    // UC6 style: result in unit of first operand
     public QuantityLength add(QuantityLength other) {
         validateLength(other, "other");
 
@@ -60,17 +56,28 @@ class QuantityLength {
         return new QuantityLength(resultValue, this.unit);
     }
 
-    // Static method: add two lengths, result in unit of first operand
-    public static QuantityLength add(QuantityLength length1, QuantityLength length2) {
-        validateLength(length1, "length1");
-        validateLength(length2, "length2");
+    // UC7: result in specified target unit
+    public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
+        validateLength(other, "other");
+        validateUnit(targetUnit, "targetUnit");
 
-        double sumInFeet = length1.toFeet() + length2.toFeet();
-        double resultValue = sumInFeet / length1.unit.getConversionFactor();
+        double sumInFeet = this.toFeet() + other.toFeet();
+        double resultValue = sumInFeet / targetUnit.getConversionFactor();
 
-        return new QuantityLength(resultValue, length1.unit);
+        return new QuantityLength(resultValue, targetUnit);
     }
 
+    // Static UC7 method
+    public static QuantityLength add(QuantityLength length1, QuantityLength length2, LengthUnit targetUnit) {
+        validateLength(length1, "length1");
+        validateLength(length2, "length2");
+        validateUnit(targetUnit, "targetUnit");
+
+        double sumInFeet = length1.toFeet() + length2.toFeet();
+        double resultValue = sumInFeet / targetUnit.getConversionFactor();
+
+        return new QuantityLength(resultValue, targetUnit);
+    }
     private static void validateValue(double value) {
         if (!Double.isFinite(value)) {
             throw new IllegalArgumentException("Value must be a finite number.");
@@ -100,19 +107,19 @@ public class app{
         QuantityLength length1 = new QuantityLength(1, LengthUnit.FEET);
         QuantityLength length2 = new QuantityLength(12, LengthUnit.INCHES);
 
-        QuantityLength result1 = length1.add(length2);
-        System.out.println("1 FEET + 12 INCHES = " + result1.getValue() + " " + result1.getUnit());
+        QuantityLength result1 = length1.add(length2, LengthUnit.YARDS);
+        System.out.println("1 FEET + 12 INCHES in YARDS = " + result1.getValue() + " " + result1.getUnit());
 
-        QuantityLength length3 = new QuantityLength(1, LengthUnit.YARDS);
+        QuantityLength length3 = new QuantityLength(100, LengthUnit.CENTIMETERS);
         QuantityLength length4 = new QuantityLength(2, LengthUnit.FEET);
 
-        QuantityLength result2 = QuantityLength.add(length3, length4);
-        System.out.println("1 YARDS + 2 FEET = " + result2.getValue() + " " + result2.getUnit());
+        QuantityLength result2 = QuantityLength.add(length3, length4, LengthUnit.INCHES);
+        System.out.println("100 CENTIMETERS + 2 FEET in INCHES = " + result2.getValue() + " " + result2.getUnit());
 
-        QuantityLength length5 = new QuantityLength(100, LengthUnit.CENTIMETERS);
-        QuantityLength length6 = new QuantityLength(1, LengthUnit.FEET);
+        QuantityLength length5 = new QuantityLength(1, LengthUnit.YARDS);
+        QuantityLength length6 = new QuantityLength(24, LengthUnit.INCHES);
 
-        QuantityLength result3 = length5.add(length6);
-        System.out.println("100 CENTIMETERS + 1 FEET = " + result3.getValue() + " " + result3.getUnit());
+        QuantityLength result3 = QuantityLength.add(length5, length6, LengthUnit.FEET);
+        System.out.println("1 YARD + 24 INCHES in FEET = " + result3.getValue() + " " + result3.getUnit());
     }
 }
