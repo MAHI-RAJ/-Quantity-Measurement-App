@@ -1,11 +1,9 @@
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 enum LengthUnit {
-    FEET(1.0),                    // base unit
-    INCHES(1.0 / 12.0),           // 1 inch = 1/12 feet
-    YARDS(3.0),                   // 1 yard = 3 feet
-    CENTIMETERS(0.03280839895);   // 1 cm = 0.03280839895 feet
+    FEET(1.0),                  // base unit
+    INCHES(1.0 / 12.0),         // 1 inch = 1/12 feet
+    YARDS(3.0),                 // 1 yard = 3 feet
+    CENTIMETERS(0.0328084);     // 1 cm = 0.0328084 feet
 
     private final double conversionFactorToFeet;
 
@@ -37,29 +35,40 @@ class QuantityLength {
         return unit;
     }
 
-    public double to(LengthUnit targetUnit) {
-        return convert(this.value, this.unit, targetUnit);
+    // Convert current object to feet
+    private double toFeet() {
+        return this.value * this.unit.getConversionFactor();
     }
 
-    public double to(LengthUnit targetUnit, int decimalPlaces) {
-        return convert(this.value, this.unit, targetUnit, decimalPlaces);
-    }
-
+    // Generic convert method from UC5
     public static double convert(double value, LengthUnit sourceUnit, LengthUnit targetUnit) {
         validateValue(value);
         validateUnit(sourceUnit, "sourceUnit");
         validateUnit(targetUnit, "targetUnit");
 
-        // Step 1: convert source value to base unit (feet)
         double valueInFeet = value * sourceUnit.getConversionFactor();
-
-        // Step 2: convert from base unit to target unit
         return valueInFeet / targetUnit.getConversionFactor();
     }
 
-    public static double convert(double value, LengthUnit sourceUnit, LengthUnit targetUnit, int decimalPlaces) {
-        double convertedValue = convert(value, sourceUnit, targetUnit);
-        return round(convertedValue, decimalPlaces);
+    // Instance method: add another length, result in unit of first operand
+    public QuantityLength add(QuantityLength other) {
+        validateLength(other, "other");
+
+        double sumInFeet = this.toFeet() + other.toFeet();
+        double resultValue = sumInFeet / this.unit.getConversionFactor();
+
+        return new QuantityLength(resultValue, this.unit);
+    }
+
+    // Static method: add two lengths, result in unit of first operand
+    public static QuantityLength add(QuantityLength length1, QuantityLength length2) {
+        validateLength(length1, "length1");
+        validateLength(length2, "length2");
+
+        double sumInFeet = length1.toFeet() + length2.toFeet();
+        double resultValue = sumInFeet / length1.unit.getConversionFactor();
+
+        return new QuantityLength(resultValue, length1.unit);
     }
 
     private static void validateValue(double value) {
@@ -74,42 +83,36 @@ class QuantityLength {
         }
     }
 
-    private static double round(double value, int decimalPlaces) {
-        if (decimalPlaces < 0) {
-            throw new IllegalArgumentException("Decimal places cannot be negative.");
+    private static void validateLength(QuantityLength length, String fieldName) {
+        if (length == null) {
+            throw new IllegalArgumentException(fieldName + " cannot be null.");
         }
+    }
 
-        return BigDecimal.valueOf(value)
-                .setScale(decimalPlaces, RoundingMode.HALF_UP)
-                .doubleValue();
+    @Override
+    public String toString() {
+        return value + " " + unit;
     }
 }
 
 public class app{
     public static void main(String[] args) {
-        // Static conversion examples
-        System.out.println("UC5: Unit-to-Unit Conversion");
-        System.out.println("--------------------------------");
+        QuantityLength length1 = new QuantityLength(1, LengthUnit.FEET);
+        QuantityLength length2 = new QuantityLength(12, LengthUnit.INCHES);
 
-        double feetToInches = QuantityLength.convert(2, LengthUnit.FEET, LengthUnit.INCHES);
-        System.out.println("2 FEET = " + feetToInches + " INCHES");
+        QuantityLength result1 = length1.add(length2);
+        System.out.println("1 FEET + 12 INCHES = " + result1.getValue() + " " + result1.getUnit());
 
-        double yardsToInches = QuantityLength.convert(1, LengthUnit.YARDS, LengthUnit.INCHES);
-        System.out.println("1 YARD = " + yardsToInches + " INCHES");
+        QuantityLength length3 = new QuantityLength(1, LengthUnit.YARDS);
+        QuantityLength length4 = new QuantityLength(2, LengthUnit.FEET);
 
-        double cmToFeet = QuantityLength.convert(100, LengthUnit.CENTIMETERS, LengthUnit.FEET, 4);
-        System.out.println("100 CENTIMETERS = " + cmToFeet + " FEET");
+        QuantityLength result2 = QuantityLength.add(length3, length4);
+        System.out.println("1 YARDS + 2 FEET = " + result2.getValue() + " " + result2.getUnit());
 
-        double inchesToFeet = QuantityLength.convert(24, LengthUnit.INCHES, LengthUnit.FEET, 2);
-        System.out.println("24 INCHES = " + inchesToFeet + " FEET");
+        QuantityLength length5 = new QuantityLength(100, LengthUnit.CENTIMETERS);
+        QuantityLength length6 = new QuantityLength(1, LengthUnit.FEET);
 
-        // Instance-based conversion example
-        QuantityLength length = new QuantityLength(3, LengthUnit.FEET);
-        double converted = length.to(LengthUnit.INCHES);
-        System.out.println("3 FEET = " + converted + " INCHES");
-
-        // Rounded instance conversion
-        double roundedConverted = length.to(LengthUnit.CENTIMETERS, 2);
-        System.out.println("3 FEET = " + roundedConverted + " CENTIMETERS");
+        QuantityLength result3 = length5.add(length6);
+        System.out.println("100 CENTIMETERS + 1 FEET = " + result3.getValue() + " " + result3.getUnit());
     }
 }
