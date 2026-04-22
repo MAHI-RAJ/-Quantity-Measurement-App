@@ -18,7 +18,6 @@ enum LengthUnit {
 class QuantityLength {
     private final double value;
     private final LengthUnit unit;
-
     public QuantityLength(double value, LengthUnit unit) {
         validateValue(value);
         validateUnit(unit, "unit");
@@ -79,7 +78,6 @@ class QuantityLength {
 
         return new QuantityLength(resultValue, targetUnit);
     }
-
     private static void validateValue(double value) {
         if (!Double.isFinite(value)) {
             throw new IllegalArgumentException("Value must be a finite number.");
