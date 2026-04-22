@@ -1,3 +1,4 @@
+
 enum LengthUnit {
     FEET(1.0),                  // base unit
     INCHES(1.0 / 12.0),         // 1 inch = 1/12 feet
